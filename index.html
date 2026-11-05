@@ -1,0 +1,154 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Velvet Connect</title>
+  <meta name="description" content="Intentional connections. Meaningful possibilities. Enrollment is paused.">
+  <meta name="theme-color" content="#14080c">
+  <meta property="og:title" content="Velvet Connect">
+  <meta property="og:description" content="Intentional connections. Meaningful possibilities. Enrollment is paused.">
+  <meta property="og:type" content="website">
+  <meta property="og:image" content="https://murraymarquis41-lang.github.io/Velvet-Connect/og.jpg">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Velvet Connect">
+  <meta name="twitter:description" content="Intentional connections. Meaningful possibilities. Enrollment is paused.">
+  <meta name="twitter:image" content="https://murraymarquis41-lang.github.io/Velvet-Connect/og.jpg">
+  <style>
+    * { box-sizing: border-box; }
+    body { margin: 0; min-height: 100vh; font-family: Inter, ui-sans-serif, system-ui, sans-serif; background: #070406; color: #f6efe8; }
+    button, input, textarea, select { font: inherit; }
+    .environment-banner { background: #3d1020; padding: 8px 16px; text-align: center; font-size: .78rem; letter-spacing: .08em; }
+    .app-container { max-width: 560px; min-height: calc(100vh - 32px); margin: 0 auto; }
+    .page { display: none; min-height: 100%; padding: 32px 20px 110px; }
+    .page.active { display: block; animation: reveal .25s ease; }
+    @keyframes reveal { from { opacity: 0; transform: translateY(10px); } }
+    .welcome { position: relative; overflow: hidden; padding-top: 10vh; text-align: center; }
+    .welcome::before, .welcome::after { content: ""; position: absolute; top: 0; bottom: 0; width: 18%; pointer-events: none; }
+    .welcome::before { left: 0; background: radial-gradient(circle at left, rgba(92,18,36,.9), transparent 72%); }
+    .welcome::after { right: 0; background: radial-gradient(circle at right, rgba(92,18,36,.9), transparent 72%); }
+    .lockup { position: relative; }
+    .brand-logo { display: block; width: 148px; height: 148px; margin: 0 auto 18px; }
+    .verify-qr { position: relative; z-index: 1; width: fit-content; margin: 28px auto 0; }
+    .verify-qr a {
+      display: block;
+      border-radius: 12px;
+      touch-action: manipulation;
+      -webkit-tap-highlight-color: rgba(231, 199, 164, 0.35);
+    }
+    .verify-qr a:active { transform: scale(0.96); }
+    .verify-qr a:focus-visible { outline: 2px solid #e7c7a4; outline-offset: 4px; }
+    .verify-qr img { display: block; width: 168px; height: 168px; border-radius: 12px; background: #f6efe8; pointer-events: none; }
+    .verify-qr figcaption { margin-top: 10px; color: #e7c7a4; font-size: .72rem; letter-spacing: .16em; text-transform: uppercase; }
+    .welcome h1 { margin: 10px 0 0; font-family: Georgia, serif; font-weight: 500; letter-spacing: .12em; font-size: clamp(1.7rem, 6vw, 2.4rem); }
+    .welcome .tagline { margin: 16px 0 0; color: #e7c7a4; font-family: Georgia, serif; font-style: italic; }
+    .welcome .paused { margin: 22px 0 0; color: #e7c7a4; font-size: .78rem; letter-spacing: .22em; text-transform: uppercase; }
+    .welcome .actions { margin-top: 24px; }
+    h1 { margin: 12px 0; font-size: clamp(2.2rem, 8vw, 3.2rem); }
+    h2 { margin: 0 0 24px; }
+    .muted { color: #b6aebc; }
+    .glass { margin: 16px 0; padding: 24px; border: 1px solid rgba(255,255,255,.12); border-radius: 22px; background: rgba(255,255,255,.055); box-shadow: 0 18px 60px rgba(0,0,0,.3); }
+    .actions { display: grid; gap: 12px; margin-top: 36px; }
+    .btn { width: 100%; padding: 14px 18px; border: 0; border-radius: 999px; color: #fff; background: linear-gradient(135deg,#ff006e,#ff4da6); font-weight: 750; cursor: pointer; }
+    .btn-outline { border: 2px solid #ff2f8b; color: #ff74b2; background: transparent; }
+    .btn:disabled { cursor: wait; opacity: .6; }
+    .input-group { margin: 0 0 18px; }
+    label { display: block; margin-bottom: 7px; color: #d6cfda; font-size: .88rem; }
+    input, textarea, select { width: 100%; padding: 13px 14px; border: 1px solid rgba(255,255,255,.14); border-radius: 12px; outline: none; color: #fff; background: rgba(255,255,255,.08); }
+    input:focus, textarea:focus, select:focus { border-color: #ff2f8b; box-shadow: 0 0 0 3px rgba(255,47,139,.18); }
+    a { color: #ff74b2; }
+    .status { min-height: 1.5rem; margin: 14px 0 0; text-align: center; color: #ffb3d1; }
+    .status.success { color: #8dffb1; }
+    .nav-bottom { position: fixed; inset: auto 0 0; display: none; justify-content: center; gap: 2px; padding: 10px max(12px,env(safe-area-inset-right)) calc(10px + env(safe-area-inset-bottom)); border-top: 1px solid rgba(255,255,255,.1); background: rgba(10,0,21,.94); backdrop-filter: blur(20px); }
+    .nav-item { padding: 9px 14px; border: 0; color: #9b91a3; background: transparent; cursor: pointer; }
+    .nav-item.active { color: #ff4da6; }
+    .profile-photo { display: block; width: 120px; height: 120px; margin: 0 auto 20px; border: 3px solid #ff2f8b; border-radius: 50%; object-fit: cover; }
+    .card-swipe { overflow: hidden; padding: 0; }
+    .card-swipe img { width: 100%; height: 330px; object-fit: cover; background: #191020; }
+    .card-copy { padding: 20px; }
+    .swipe-actions { display: flex; gap: 16px; margin-top: 16px; }
+    .checkbox-row { display: grid; grid-template-columns: auto 1fr; gap: 10px; align-items: start; }
+    .checkbox-row input { width: auto; margin-top: 4px; }
+    .danger-zone { border-color: rgba(255,83,112,.45); }
+    .danger { background: #a51d3d; }
+    .moderation-case { padding: 16px 0; border-bottom: 1px solid rgba(255,255,255,.1); }
+    .moderation-case:last-child { border-bottom: 0; }
+    .moderation-actions { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 8px; }
+  </style>
+</head>
+<body>
+  <div class="environment-banner" id="environmentBanner">ENVIRONMENT CHECK</div>
+  <main class="app-container" id="appContainer">
+    <section class="page active welcome" id="welcomePage">
+      <div class="lockup">
+        <img class="brand-logo" src="./logo.png" width="148" height="148" alt="">
+        <p class="paused">Enrollment paused</p>
+        <h1>VELVET CONNECT</h1>
+        <p class="tagline">Intentional connections. Meaningful possibilities.</p>
+      </div>
+      <figure class="verify-qr">
+        <a href="https://murraymarquis41-lang.github.io/Velvet-Connect/">
+          <img src="./verification-qr.svg" width="168" height="168" alt="QR code linking to the Velvet Connect verification page">
+          <figcaption>Tap or scan to open this page</figcaption>
+        </a>
+      </figure>
+      <div class="actions"><button class="btn" id="signupEntryButton" type="button" onclick="navigateTo('signupPage')" disabled>Create Account</button><button class="btn btn-outline" type="button" onclick="navigateTo('loginPage')">Sign In</button></div>
+    </section>
+    <section class="page" id="signupPage">
+      <h2 id="signupHeading">Create an account</h2>
+      <figure class="verify-qr">
+        <a href="https://murraymarquis41-lang.github.io/Velvet-Connect/#enroll">
+          <img src="./enrollment-qr.svg" width="168" height="168" alt="QR code linking to the Velvet Connect enrollment page">
+          <figcaption>Tap or scan to open this page</figcaption>
+        </a>
+      </figure>
+      <form class="glass" id="signupForm">
+        <div class="input-group"><label for="signupName">Display name</label><input id="signupName" minlength="2" maxlength="60" autocomplete="name" required></div>
+        <div class="input-group"><label for="signupEmail">Email</label><input id="signupEmail" type="email" autocomplete="email" required></div>
+        <div class="input-group"><label for="signupPassword">Password</label><input id="signupPassword" type="password" minlength="8" autocomplete="new-password" required></div>
+        <div class="input-group"><label for="signupBirthDate">Date of birth</label><input id="signupBirthDate" type="date" autocomplete="bday" required></div>
+        <div class="input-group checkbox-row"><input id="signupAdultAttestation" type="checkbox" required><label for="signupAdultAttestation">I confirm that I am at least 18 years old.</label></div>
+        <div class="input-group checkbox-row"><input id="signupTermsConsent" type="checkbox" required><label for="signupTermsConsent">I accept the Terms and Privacy Notice for this staging release.</label></div>
+        <button class="btn" id="signupButton" type="submit" disabled>Create Account</button><p class="status" id="signupStatus" role="status" aria-live="polite"></p>
+        <p><a href="#" onclick="navigateTo('loginPage')">Already have an account?</a></p>
+      </form>
+    </section>
+    <section class="page" id="loginPage">
+      <h2>Sign in</h2>
+      <form class="glass" id="loginForm">
+        <div class="input-group"><label for="loginEmail">Email</label><input id="loginEmail" type="email" autocomplete="email" required></div>
+        <div class="input-group"><label for="loginPassword">Password</label><input id="loginPassword" type="password" autocomplete="current-password" required></div>
+        <button class="btn" id="loginButton" type="submit">Log In</button><p class="status" id="loginStatus" role="status" aria-live="polite"></p>
+      </form>
+    </section>
+    <section class="page" id="verifyPage">
+      <h2>Verify your email</h2>
+      <div class="glass"><p class="muted">Open the confirmation link sent by Supabase Auth, then return here to sign in.</p><button class="btn" type="button" onclick="navigateTo('loginPage')">Return to Sign In</button><button class="btn btn-outline" type="button" style="margin-top:12px" onclick="resendConfirmation()">Resend Confirmation</button><p class="status" id="verifyStatus" role="status" aria-live="polite"></p></div>
+    </section>
+    <section class="page" id="profileSetupPage">
+      <h2>Build your profile</h2>
+      <div class="glass">
+        <img id="profilePreview" class="profile-photo" alt="Profile preview" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Ccircle cx='60' cy='60' r='58' fill='%23221928'/%3E%3C/svg%3E">
+        <div class="input-group"><label for="photoUpload">Local photo preview</label><input id="photoUpload" type="file" accept="image/*" onchange="previewProfilePhoto(event)"></div>
+        <div class="input-group"><label for="bio">Bio</label><textarea id="bio" rows="4" maxlength="500"></textarea></div>
+        <div class="input-group"><label for="interests">Interests (comma separated)</label><input id="interests" maxlength="300" placeholder="Travel, Music, Art"></div>
+        <button class="btn" type="button" onclick="saveProfile()">Save to Staging</button><p class="status" id="profileStatus" role="status" aria-live="polite"></p>
+      </div>
+    </section>
+    <section class="page" id="dashboardPage">
+      <h2>Discover</h2>
+      <div class="glass card-swipe" id="profileCard"><img id="cardPhoto" alt="Profile"><div class="card-copy"><h3 id="cardName">Loading…</h3><p id="cardBio" class="muted"></p><p id="cardInterests"></p></div></div>
+      <div class="swipe-actions"><button class="btn btn-outline" type="button" onclick="swipeLeft()">Pass</button><button class="btn" type="button" onclick="swipeRight()">Like</button></div>
+      <details class="glass"><summary>Report or block this profile</summary><div class="input-group"><label for="reportReason">Reason</label><select id="reportReason"><option value="harassment">Harassment</option><option value="impersonation">Impersonation</option><option value="hate">Hate or discrimination</option><option value="violence">Violence or threats</option><option value="underage concern">Underage concern</option><option value="other">Other</option></select></div><div class="input-group"><label for="reportDetails">What happened?</label><textarea id="reportDetails" rows="3" maxlength="2000"></textarea></div><button class="btn btn-outline" type="button" onclick="reportCurrentProfile()">Report and Disconnect</button></details>
+      <p class="status" id="discoverStatus" role="status" aria-live="polite"></p>
+    </section>
+    <section class="page" id="matchPage"><div class="glass"><h2>It’s a match</h2><p id="matchName"></p><button class="btn" type="button" onclick="navigateTo('chatPage')">Open Messages</button></div></section>
+    <section class="page" id="chatPage"><h2>Messages</h2><div class="glass" id="chatMessages"><p class="muted">Live messaging becomes available after a verified mutual match.</p></div><div class="input-group"><label for="chatInput">Message</label><input id="chatInput" maxlength="2000"></div><button class="btn" type="button" onclick="sendMessage()">Send</button></section>
+    <section class="page" id="settingsPage"><h2>Settings</h2><div class="glass"><button class="btn btn-outline" type="button" onclick="logout()">Sign Out</button></div><div class="glass"><h3>Your case responses</h3><p class="muted">When a moderator requests a response, you may provide your own statement. Other members cannot see it. Responding does not reconnect you with another member.</p><button class="btn btn-outline" type="button" onclick="loadCaseResponses()">Refresh Responses</button><p class="status" id="caseResponseStatus" role="status" aria-live="polite"></p><div id="caseResponses"></div></div><div class="glass" id="appealPanel" hidden><h3>Appeal a moderation decision</h3><div class="input-group"><label for="appealCase">Eligible case</label><select id="appealCase"></select></div><div class="input-group"><label for="appealStatement">Your statement</label><textarea id="appealStatement" rows="4" minlength="10" maxlength="2000"></textarea></div><button class="btn btn-outline" type="button" onclick="submitAppeal()">Submit Appeal</button><p class="status" id="appealStatus" role="status" aria-live="polite"></p></div><div class="glass danger-zone"><h3>Delete account</h3><p class="muted">This permanently deletes your authentication identity and all user-owned data in this release, including your profile, matches, messages, reports, and blocks. Case statements are removed and evidence files are queued for secure deletion. Physical file deletion requires the evidence cleanup service to complete successfully. This cannot be undone.</p><div class="input-group"><label for="deleteConfirmation">Type DELETE to confirm</label><input id="deleteConfirmation" autocomplete="off"></div><button class="btn danger" id="deleteAccountButton" type="button" onclick="deleteAccount()">Permanently Delete Account</button><p class="status" id="deleteStatus" role="status" aria-live="polite"></p></div></section>
+    <section class="page" id="adminPage"><h2>Moderation</h2><div class="glass"><p class="muted">Human review queue. Every action requires a reason and is written to the immutable audit log.</p><button class="btn btn-outline" type="button" onclick="loadModerationQueue()">Refresh Queue</button><p class="status" id="moderationStatus" role="status" aria-live="polite"></p><div id="moderationQueue"></div></div><div class="glass"><h3>Pending appeals</h3><p class="muted">Appeals require a safety administrator or CEO who did not impose the appealed decision. Claim independent review before viewing case evidence.</p><div id="appealQueue"></div></div></section>
+  </main>
+  <nav class="nav-bottom" id="bottomNav" aria-label="Primary"><button class="nav-item active" data-page="dashboardPage" onclick="navigateTo('dashboardPage')">Discover</button><button class="nav-item" data-page="chatPage" onclick="navigateTo('chatPage')">Chats</button><button class="nav-item" data-page="profileSetupPage" onclick="navigateTo('profileSetupPage')">Profile</button><button class="nav-item" data-page="settingsPage" onclick="navigateTo('settingsPage')">Settings</button><button class="nav-item" id="adminNav" data-page="adminPage" onclick="navigateTo('adminPage')" hidden>Admin</button></nav>
+  <script type="module" src="./src/app.ts"></script>
+</body>
+</html>
+

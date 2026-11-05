@@ -1,0 +1,50 @@
+name: WP-01B Engineering Gates
+
+on:
+  push:
+    branches: [main, "fix/wp-01b-engineering-gates"]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: wp-01b-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    name: Install, lint, typecheck, test, build
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    env:
+      VITE_APP_ENV: staging
+      VITE_ENABLE_ENROLLMENT: "false"
+      VITE_SUPABASE_URL: https://qqintbwoalvoegvqoxlo.supabase.co
+      VITE_SUPABASE_PUBLISHABLE_KEY: sb_publishable_HuzOX6mv9QBruN_8Ct3n6Q_CFNrt4pe
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v5
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: npm
+          package-manager-cache: false
+
+      - name: Clean dependency installation
+        run: npm ci
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Automated tests
+        run: npm test
+
+      - name: Production build
+        run: npm run build

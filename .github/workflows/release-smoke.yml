@@ -1,0 +1,85 @@
+name: Production verification release smoke
+
+on:
+  push:
+    branches: [main, feature/build-03-milestone-delta]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  live-smoke:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Verify exact deployed GitHub Pages surface
+        shell: bash
+        run: |
+          set -euo pipefail
+          URL="https://murraymarquis41-lang.github.io/Velvet-Connect/"
+          for attempt in $(seq 1 18); do
+            if curl -fsSL --retry 2 --retry-delay 2 "$URL" -o /tmp/velvet.html \
+              && curl -fsSL --retry 2 --retry-delay 2 "${URL}build-metadata.json" -o /tmp/build-metadata.json; then
+              ASSET=$(sed -n 's#.*src="\([^"]*assets/index-[^"]*\.js\)".*#\1#p' /tmp/velvet.html | head -1)
+              if [ -n "$ASSET" ]; then
+                ORIGIN=$(printf '%s' "$URL" | sed -E 's#^(https?://[^/]+).*#\1#')
+                curl -fsSL "${ORIGIN}${ASSET}" -o /tmp/velvet.js
+                if grep -q "Velvet Connect" /tmp/velvet.html \
+                  && grep -q "PRODUCTION VERIFICATION · ENROLLMENT PAUSED" /tmp/velvet.js \
+                  && grep -q "https://qqintbwoalvoegvqoxlo.supabase.co" /tmp/velvet.js \
+                  && grep -q "\"commit\":\"${GITHUB_SHA}\"" /tmp/build-metadata.json \
+                  && grep -q "\"enrollment\":\"paused\"" /tmp/build-metadata.json; then
+                  echo "Exact-SHA public verification surface passed: $URL"
+                  cat /tmp/build-metadata.json
+                  exit 0
+                fi
+              fi
+            fi
+            echo "Waiting for exact Pages deployment (attempt $attempt/18)..."
+            sleep 10
+          done
+          echo "Expected exact-SHA Velvet Connect verification content was not observed at $URL" >&2
+          exit 1
+
+      # The former verification project rrtxdzwfudlqbcticmlp no longer resolves.
+      # This gate uses the live staging project and its committed publishable key.
+      - name: Verify Supabase Auth service health
+        shell: bash
+        env:
+          SUPABASE_PUBLISHABLE_KEY: sb_publishable_HuzOX6mv9QBruN_8Ct3n6Q_CFNrt4pe
+        run: |
+          set -euo pipefail
+          curl -fsS \
+            -H "apikey: ${SUPABASE_PUBLISHABLE_KEY}" \
+            -H "Authorization: Bearer ${SUPABASE_PUBLISHABLE_KEY}" \
+            "https://qqintbwoalvoegvqoxlo.supabase.co/auth/v1/health" \
+            -o /tmp/auth-health.json
+          grep -q '"name":"GoTrue"' /tmp/auth-health.json
+          cat /tmp/auth-health.json
+
+      - name: Verify Supabase REST key and anonymous RLS protection
+        shell: bash
+        env:
+          SUPABASE_PUBLISHABLE_KEY: sb_publishable_HuzOX6mv9QBruN_8Ct3n6Q_CFNrt4pe
+        run: |
+          set -euo pipefail
+          STATUS=$(curl -sS -o /tmp/profiles.json -w "%{http_code}" \
+            -H "apikey: ${SUPABASE_PUBLISHABLE_KEY}" \
+            -H "Authorization: Bearer ${SUPABASE_PUBLISHABLE_KEY}" \
+            "https://qqintbwoalvoegvqoxlo.supabase.co/rest/v1/profiles?select=id&limit=1")
+          BODY=$(tr -d '[:space:]' < /tmp/profiles.json)
+          echo "Profiles probe HTTP status: $STATUS"
+          if [ "$STATUS" = "200" ]; then
+            test "$BODY" = "[]"
+            echo "Supabase REST reached successfully; anonymous profile query returned no rows under RLS."
+          elif [ "$STATUS" = "401" ] || [ "$STATUS" = "403" ]; then
+            echo "Supabase REST reached successfully; anonymous profile access was explicitly denied."
+          else
+            echo "Unexpected Supabase REST response: HTTP $STATUS" >&2
+            cat /tmp/profiles.json >&2
+            exit 1
+          fi
+
+# Public verification remains enrollment-paused. A successful run proves the
+# deployed commit identity and service/RLS reachability; it does not authorize
+# enrollment or merge the draft pull request.
